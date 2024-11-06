@@ -1,13 +1,16 @@
-"use client"
+"use client";
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from 'next/navigation';
 
 const FileUpload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [message, setMessage] = useState<string>('');
+  const { toast } = useToast();
+  const router = useRouter();
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -28,9 +31,21 @@ const FileUpload: React.FC = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      setMessage(response.data.message);
+
+      // Show success toast
+      toast({
+        title: "Upload Successful",
+        description: "FileUploaded "
+        // status: "success", // Ensure this property is supported
+      });
+      router.push("/")
     } catch (error: any) {
-      setMessage('File upload failed: ' + (error.response?.data?.message || error.message));
+      // Show error toast
+      toast({
+        title: "Upload Failed",
+        description: 'File upload failed: ' + (error.response?.data?.message || error.message),
+        // status: "error", // Ensure this property is supported
+      });
     }
   };
 
@@ -40,7 +55,6 @@ const FileUpload: React.FC = () => {
       <Button onClick={handleUpload} className="bg-blue-500 text-white">
         Upload
       </Button>
-      {message && <p className="mt-2 text-sm text-gray-500">{message}</p>}
     </div>
   );
 };
